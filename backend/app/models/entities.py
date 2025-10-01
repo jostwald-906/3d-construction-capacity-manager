@@ -3,14 +3,15 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 from geoalchemy2 import Geometry
 from app.models.base import Base
+from datetime import date
 
 class Project(Base):
     __tablename__ = "projects"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     description: Mapped[str | None]
-    start_date: Mapped[Date | None]
-    end_date: Mapped[Date | None]
+    start_date: Mapped[date | None]
+    end_date: Mapped[date | None]
     models = relationship("Model", back_populates="project", cascade="all, delete-orphan")
 
 class Model(Base):
@@ -79,8 +80,8 @@ class Allocation(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     gridcell_id: Mapped[int] = mapped_column(ForeignKey("grid_cells.id"))
     trade_id: Mapped[int] = mapped_column(ForeignKey("trades.id"))
-    work_date: Mapped[Date]
-    end_date: Mapped[Date | None]
+    work_date: Mapped[date]
+    end_date: Mapped[date | None]
     num_workers: Mapped[int | None]
     description: Mapped[str | None]
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
