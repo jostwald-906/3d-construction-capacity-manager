@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - postgres
+    command: ["sh", "-c", "python -m app.db.wait_for_db && psql -h postgres -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f db/init.sql && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"]
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - VITE_BACKEND_URL=${BACKEND_URL}
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
