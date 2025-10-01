@@ -55,7 +55,7 @@ def capacity_check(db: Session, gridcell_id: int, trade_id: int, start_date, end
     ).first()
 
     if total_assigned + new_workers > cell.total_capacity:
-        return False, "Total capacity exceeded"
+        return True, "Warning: Total capacity exceeded"
     if trade_cap and trade_assigned + new_workers > trade_cap.max_workers:
-        return False, "Trade capacity exceeded"
+        return True, "Warning: Trade capacity exceeded"
     return True, None
