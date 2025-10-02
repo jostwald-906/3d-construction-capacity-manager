@@ -16,3 +16,23 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db)):
 def list_projects(db: Session = Depends(get_db)):
     projs = db.query(Project).all()
     return [ProjectOut(id=p.id, name=p.name, description=p.description, start_date=p.start_date, end_date=p.end_date) for p in projs]
+
+@router.put("/{project_id}", response_model=ProjectOut, dependencies=[Depends(require_role("admin"))])
+def update_project(project_id: int, payload: ProjectCreate, db: Session = Depends(get_db)):
+    p = db.query(Project).get(project_id)
+    if not p:
+        raise HTTPException(status_code=404, detail="Project not found")
+    for key, value in payload.model_dump().items():
+        setattr(p, key, value)
+    db.commit()
+    db.refresh(p)
+    return ProjectOut(id=p.id, name=p.name, description=p.description, start_date=p.start_date, end_date=p.end_date)
+
+@router.delete("/{project_id}", response_model=dict, dependencies=[Depends(require_role("admin"))])
+def delete_project(project_id: int, db: Session = Depends(get_db)):
+    p = db.query(Project).get(project_id)
+    if not p:
+        raise HTTPException(status_code=404, detail="Project not found")
+    db.delete(p)
+    db.commit()
+    return {"deleted": project_id}

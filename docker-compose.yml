@@ -19,12 +19,14 @@ services:
   backend:
     build: ./backend
     env_file: .env
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-cm_password}
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "8000:8000"
-    command: ["sh", "-c", "python -m app.db.wait_for_db && psql -h postgres -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f db/init.sql && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    command: ["sh", "-c", "python -m app.db.wait_for_db && PGPASSWORD=${POSTGRES_PASSWORD:-cm_password} psql -h postgres -U ${POSTGRES_USER:-cm_user} -d ${POSTGRES_DB:-capacity_manager} -f db/init.sql && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
 
   frontend:
     build: ./frontend
