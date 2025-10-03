@@ -6,6 +6,7 @@ import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ModelView from "./pages/ModelView.jsx";
 import Projects from "./pages/Projects.jsx";
+import Models from "./pages/Models.jsx";
 import { AuthProvider, useAuth } from "./state/AuthContext.jsx";
 
 function Protected({ children }) {
@@ -22,6 +23,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login/>} />
           <Route path="/" element={<Protected><Dashboard/></Protected>} />
           <Route path="/projects" element={<Protected><Projects/></Protected>} />
+          <Route path="/models" element={<Protected><Models/></Protected>} />
           <Route path="/model/:id" element={<Protected><ModelView/></Protected>} />
         </Routes>
       </BrowserRouter>

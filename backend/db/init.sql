@@ -83,7 +83,8 @@ BEGIN
     INSERT INTO trades(name) VALUES ('Electrical'),('Mechanical'),('Piping'),('Welding'),('Paint');
   END IF;
   IF NOT EXISTS (SELECT 1 FROM users WHERE username='admin') THEN
+    -- Default admin user: username=admin, password=admin123
     INSERT INTO users(username, password_hash, role)
-    VALUES ('admin', '$2b$12$1XkP4h1lJY8c3S0N3w9p0uKCoOe6Zy0tX4XoYQ98J0kF4OQH2gJqS', 'admin');
+    VALUES ('admin', '$2b$12$lfpu4dHUVRMsVEaXMSGj9ONwMaOKIsQt9vSMTAXU0oHG.1Mgz/rMq', 'admin');
   END IF;
 END$$;

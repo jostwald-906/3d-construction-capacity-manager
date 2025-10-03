@@ -11,3 +11,7 @@ python-multipart==0.0.6
 numpy<2.0.0
 geoalchemy2==0.14.2
 shapely==2.0.2
+trimesh==4.0.5
+pygltflib==1.16.1
+lxml==5.1.0
+pycollada==0.8

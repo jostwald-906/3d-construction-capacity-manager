@@ -4,12 +4,24 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from geoalchemy2.shape import from_shape
 from app.models.entities import Model, GridCell, Allocation, TradeCapacity
+from app.services.model_parser import parse_3d_model
+import os
 
 def generate_grid(db: Session, model: Model, sx: int, sy: int, sz: int, default_capacity: int) -> List[GridCell]:
     db.query(GridCell).filter(GridCell.model_id == model.id).delete()
     dx = (model.max_x - model.min_x) / sx
     dy = (model.max_y - model.min_y) / sy
     dz = (model.max_z - model.min_z) / sz
+
+    # Load model geometry if available for shape-aware voxelization
+    vertices = None
+    if model.model_file_path and os.path.exists(model.model_file_path):
+        try:
+            parsed = parse_3d_model(model.model_file_path, model.format)
+            vertices = parsed.get('vertices', None)
+        except:
+            pass  # Fall back to bounding box grid if parsing fails
+
     cells: List[GridCell] = []
     for i in range(sx):
         for j in range(sy):
@@ -20,6 +32,18 @@ def generate_grid(db: Session, model: Model, sx: int, sy: int, sz: int, default_
                 max_y = min_y + dy
                 min_z = model.min_z + k * dz
                 max_z = min_z + dz
+
+                # Shape-aware filtering: only create cell if it contains geometry
+                if vertices:
+                    cell_contains_geometry = any(
+                        min_x <= v[0] <= max_x and
+                        min_y <= v[1] <= max_y and
+                        min_z <= v[2] <= max_z
+                        for v in vertices
+                    )
+                    if not cell_contains_geometry:
+                        continue  # Skip empty cells
+
                 poly = Polygon([(min_x, min_y),(max_x, min_y),(max_x, max_y),(min_x, max_y)])
                 cell = GridCell(
                     model_id=model.id,
